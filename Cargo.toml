@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+members = ["libadalang-sys"]
+
+[package]
+name = "libadalang"
+version = "25.0.0"
+edition = "2024"
+
+[dependencies]
+libadalang-sys = { version = "25.0.0", path = "./libadalang-sys" }
