@@ -36,7 +36,7 @@ impl Context {
         charset: &str,
         reparse: bool,
         rule: GrammarRule,
-    ) -> Unit {
+    ) -> Result<Unit, Exception> {
         let filename = CString::new(filename).unwrap();
         let charset = CString::new(charset).unwrap();
 
@@ -50,8 +50,7 @@ impl Context {
             )
         };
 
-        Exception::log_and_ignore();
-        unsafe { Unit::from_raw(unit) }
+        Exception::wrap(unsafe { Unit::from_raw(unit) })
     }
 }
 
