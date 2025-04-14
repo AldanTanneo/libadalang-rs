@@ -21,7 +21,7 @@ impl Exception {
             let res = Self {
                 kind: ex.kind,
                 msg: unsafe { CStr::from_ptr(ex.information) }
-                    .to_string_lossy()
+                    .to_string_lossy() // to avoid a panic. error messages should be unicode anyway.
                     .into(),
             };
             Some(res)
@@ -37,14 +37,17 @@ impl Exception {
         }
     }
 
-    /// Log the last raised exception and continue
+    /// Log the last raised exception and continue.
+    ///
+    /// Use this in `Drop` implementations: we don't want a destructor to panic, as this could
+    /// occur during unwinding and abort the process.
     pub fn log_and_ignore() {
         if let Some(e) = Self::get_last() {
             eprintln!("{e}");
         }
     }
 
-    /// Abort if the last operation raised an exception
+    /// Abort if the last operation raised an exception.
     pub fn log_and_abort() {
         if let Some(e) = Self::get_last() {
             eprintln!("{e}");
@@ -52,12 +55,12 @@ impl Exception {
         }
     }
 
-    /// Get the exception kind
+    /// Get the exception kind.
     pub fn kind(&self) -> ExceptionKind {
         self.kind
     }
 
-    /// Get the exception message
+    /// Get the exception message.
     pub fn message(&self) -> &str {
         &self.msg
     }
