@@ -1,36 +1,10 @@
-use libadalang_sys::{ada_diagnostic, ada_source_location, ada_source_location_range};
+use libadalang_sys::ada_diagnostic;
 
 use crate::text::Text;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct SourceLocation {
-    pub line: u32,
-    pub column: u16,
-}
-
-impl From<&ada_source_location> for SourceLocation {
-    fn from(value: &ada_source_location) -> Self {
-        Self {
-            line: value.line,
-            column: value.column,
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct SourceLocationRange {
-    pub start: SourceLocation,
-    pub end: SourceLocation,
-}
-
-impl From<&ada_source_location_range> for SourceLocationRange {
-    fn from(value: &ada_source_location_range) -> Self {
-        Self {
-            start: (&value.start).into(),
-            end: (&value.end).into(),
-        }
-    }
-}
+pub use libadalang_sys::{
+    ada_source_location as SourceLocation, ada_source_location_range as SourceLocationRange,
+};
 
 pub struct Diagnostic {
     pub sloc_range: SourceLocationRange,
@@ -40,7 +14,7 @@ pub struct Diagnostic {
 impl Diagnostic {
     pub fn from_raw(raw: ada_diagnostic) -> Self {
         Self {
-            sloc_range: (&raw.sloc_range).into(),
+            sloc_range: raw.sloc_range,
             message: Text::from_raw_borrow(&raw.message).to_string(),
         }
     }
@@ -58,12 +32,12 @@ impl Diagnostic {
 
 pub(crate) fn make_diag(sloc_range: [(u32, u16); 2], msg: &str) -> ada_diagnostic {
     ada_diagnostic {
-        sloc_range: ada_source_location_range {
-            start: ada_source_location {
+        sloc_range: SourceLocationRange {
+            start: SourceLocation {
                 line: sloc_range[0].0,
                 column: sloc_range[0].1,
             },
-            end: ada_source_location {
+            end: SourceLocation {
                 line: sloc_range[1].0,
                 column: sloc_range[1].1,
             },

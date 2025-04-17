@@ -8,3 +8,9 @@
 #![allow(rustdoc::broken_intra_doc_links)]
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+
+impl Default for ada_grammar_rule {
+    fn default() -> Self {
+        ada_grammar_rule::COMPILATION
+    }
+}
