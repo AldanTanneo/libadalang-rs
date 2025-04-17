@@ -11,6 +11,15 @@ use crate::{
     text::Text,
 };
 
+pub trait EventHandlerInterface: Sized + 'static {
+    fn unit_requested(&mut self, ctx: Option<Context>, event: UnitRequestedEvent);
+    fn unit_parsed(&mut self, ctx: Option<Context>, event: UnitParsedEvent);
+
+    fn as_event_handler(self) -> Result<EventHandler, Exception> {
+        EventHandler::new(self, Self::unit_requested, Self::unit_parsed)
+    }
+}
+
 pub struct EventHandler(ada_event_handler);
 
 struct EventHandlerData<D, F, G> {
@@ -95,7 +104,7 @@ pub struct UnitParsedEvent {
 }
 
 impl EventHandler {
-    pub fn new<D, F, G>(data: D, unit_requested: F, unit_parsed: G) -> Result<Self, Exception>
+    fn new<D, F, G>(data: D, unit_requested: F, unit_parsed: G) -> Result<Self, Exception>
     where
         D: 'static,
         F: FnMut(&mut D, Option<Context>, UnitRequestedEvent) + 'static,
