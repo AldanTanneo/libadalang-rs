@@ -41,18 +41,24 @@ impl ParseCallbacks for ItemNameCallback {
 
 fn main() -> Result<(), Box<dyn Error>> {
     let lal_version = concat!("libadalang=", env!("CARGO_PKG_VERSION"));
-    Command::new("alr")
-        .args(["get", lal_version, "--build"])
-        .env("LIBADALANG_BUILD_MODE", "prod")
-        .status()?;
 
     let lal_dir = String::from_utf8(
         Command::new("alr")
-            .args(["get", "libadalang", "--dirname"])
+            .args(["get", lal_version, "--dirname"])
             .output()?
             .stdout,
     )?;
     let lal_dir = lal_dir.trim();
+
+    if !std::fs::metadata(lal_dir)
+        .map(|d| d.is_dir())
+        .unwrap_or(false)
+    {
+        Command::new("alr")
+            .args(["get", lal_version, "--build"])
+            .env("LIBADALANG_BUILD_MODE", "prod")
+            .status()?;
+    }
 
     let cwd = env::current_dir()?;
 
